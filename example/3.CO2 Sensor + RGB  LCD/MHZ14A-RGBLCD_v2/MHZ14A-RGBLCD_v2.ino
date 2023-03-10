@@ -1,5 +1,5 @@
 /*
-* ESP32 CO2 Meter - MH-Z14A + 1602 RGB LCD 동작 예제
+* ESP32 CO2 Meter - MH-Z14A + 1602 RGB LCD 동작 예제 v2
 * CO2센서의 측정값을 LCD로 출력하는 예제입니다.
 * 
 * CO2 ppm - LCD 색상 (Lv 1~7)
@@ -30,58 +30,63 @@
 #include <MHZ.h>
 #include "Waveshare_LCD1602_RGB.h"
 
-MHZ co2(Serial2, MHZ14A);         // MHZ14A Hw serial 설정
-Waveshare_LCD1602_RGB lcd(16,2);  // 1602 I2C LCD 설정 / I2C Pin - SCL: 22 / SDA: 21
+#define PREHEATING_TIME 60
+
+MHZ co2(Serial2, MHZ14A);   // MHZ14A Hw serial 설정
+Waveshare_LCD1602_RGB lcd(16,2);  // 1602 I2C LCD 설정 / I2C Pin - SCL: 22 / SDA: 21 
 
 int co2_ppm = 0;
-char co2_ppm_str[100] = {0,};
+char co2_ppm_str[20] = {0,};
+char lcdstr[20] = {0,};
 int co2_level = 0, print_co2_level = 0;
+int Preheating_time = PREHEATING_TIME;
 
 void setup() 
 {
-  Serial.begin(115200);                 // PC 시리얼 통신 설정 / 보드레이트: 115200
+  Serial.begin(115200);                 // PC 시리얼 통신 설정 / 보드레이트: 115200 
   Serial.println("Enable UATRT0 (PC)");   
   delay(200); 
-  
+
   Serial2.begin(9600);                  // MHZ14A 시리얼 통신 / 보드레이트: 9600
   // co2.setDebug(true);                // 디버그 정보 표시
   Serial.println("Enable UATRT2 (MHZ14A)");
   delay(200);
 
-  lcd.init();                           // LCD 설정, 화면 출력
+  lcd.init();                           // LCD 설정, 화면 설정
   lcd.setColorWhite();
   Serial.println("Enable 1608 RGB LCD");
   delay(200);
-
-  // 센서 예열 대기 - MHZ14A 1분
+  
+  // 센서 예열 대기 - MHZ14A 60초 
   if (co2.isPreHeating()) {
-    Serial.print("Preheating 60s");
+    Serial.println("Preheating Sensor \nWaiting...");  
     lcd.setCursor(0,0);
     lcd.send_string("Preheating");
     lcd.setCursor(0,1);
-    lcd.send_string("Wait 60s");
-    while (co2.isPreHeating()) {
-      Serial.print(".");
-      delay(1000);
-    }
-    Serial.println();
-  } // 삭제 하면 바로 센서 데이터 수신 가능 (단, 예열 시간 동안 측정 정확도가 보장되지 않음)
+    lcd.send_string("Wait ");
+    do{
+      Preheating_time = PREHEATING_TIME - (millis()/1000);  // ESP32 부팅(전원 연결) 시간 기준으로 예열 시간 계산
+      Serial.println(String(Preheating_time) + "s");  
+      lcd.setCursor(5,1);
+      sprintf(lcdstr, " %ds ", Preheating_time);
+      lcd.send_string(lcdstr);
+      delay(1000); 
+    }while(Preheating_time > 0);
+  }
 
-  // 설정 및 초기화, 센서 예열 종료, 반복 측정 시작
-  Serial.println("Start CO2 Sensor!!!");
+  // 설정 및 초기화 종료, 반복 측정 시작
+  Serial.println("Start CO2 Sensor!!!"); 
   lcd.clear();
 }
 
 void loop() {
-
+  
   // CO2 값 읽어오기 
-  co2_ppm = co2.readCO2UART();  // CO2 센서 값 읽어오기
-
+  co2_ppm = co2.readCO2UART();
+  
   co2_level = AlarmLevelSet(co2_ppm);       // CO2 레벨 계산
   AlarmLcdColorSet(co2_level);              // LCD 색상 설정
-
-  print_co2_level = co2_level + 1;          // 출력용 레벨 수정 0~6 -> 1~7;
-
+  
   // LCD에 ppm 값 출력 - 1열
   lcd.setCursor(0,0);
   lcd.send_string("CO2 :");
@@ -94,10 +99,10 @@ void loop() {
   // LCD에 레벨 값 출력 - 2열
   lcd.setCursor(0,1);
   lcd.send_string("CO2 LEVEL : ");
-  lcd.write_char((print_co2_level+'0'));          // char 출력 아스키 코드 변환(int to char): ('0'== 48)+(int 0~9) = '0'~'9' 
-
+  lcd.write_char((co2_level+'0'));          // char 출력 아스키 코드 변환 : int to char ('0' = 48 ) + (int 0~9) 
+  
   // PC에 CO2 값 전송
-  Serial.println("CO2 : " + String(co2_ppm) + " ppm | Level : " + String(print_co2_level));  
+  Serial.println("CO2 : " + String(co2_ppm) + " ppm | Level : " + String(co2_level));  
   
   // 5초 지연, 반복
   delay(5000);
@@ -105,17 +110,19 @@ void loop() {
 
 
 
+
+
 // CO2 LEVEL 계산 함수 (7단계 (0~6)) 
 int AlarmLevelSet(int CO2ppm){
 
-  // 각 농도 범위 (0~450, 450~700, 700~1000, 1000~1500...)설정을 위한 배열
+  // 각 농도 범위 (0~450, 450~700, 700~1000, 1000~1500......)설정을 위한 배열
   int alarmLevel[8]={0,450,700,1000,1500,2000,3000,10000};
 
   // CO2 ppm 값에따라 낮은 ppm부터 검사하여 범위에 해당하면 레벨 리턴 후 종료
   for(int alarmLevelCnt = 0; alarmLevelCnt < 7; alarmLevelCnt++){
     if(alarmLevel[alarmLevelCnt] <= CO2ppm && CO2ppm < alarmLevel[(alarmLevelCnt+1)]){
 
-      return alarmLevelCnt; 
+      return alarmLevelCnt;
     }
   }
   return -1;
