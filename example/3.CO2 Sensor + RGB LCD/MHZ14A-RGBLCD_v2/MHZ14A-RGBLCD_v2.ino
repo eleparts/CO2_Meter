@@ -87,6 +87,8 @@ void loop() {
   co2_level = AlarmLevelSet(co2_ppm);       // CO2 레벨 계산
   AlarmLcdColorSet(co2_level);              // LCD 색상 설정
   
+  print_co2_level = co2_level + 1;          // 출력용 레벨 수정 0~6 -> 1~7;
+
   // LCD에 ppm 값 출력 - 1열
   lcd.setCursor(0,0);
   lcd.send_string("CO2 :");
@@ -99,10 +101,10 @@ void loop() {
   // LCD에 레벨 값 출력 - 2열
   lcd.setCursor(0,1);
   lcd.send_string("CO2 LEVEL : ");
-  lcd.write_char((co2_level+'0'));          // char 출력 아스키 코드 변환 : int to char ('0' = 48 ) + (int 0~9) 
+  lcd.write_char((print_co2_level+'0'));          // char 출력 아스키 코드 변환 : int to char ('0' = 48 ) + (int 0~9) 
   
   // PC에 CO2 값 전송
-  Serial.println("CO2 : " + String(co2_ppm) + " ppm | Level : " + String(co2_level));  
+  Serial.println("CO2 : " + String(co2_ppm) + " ppm | Level : " + String(print_co2_level));  
   
   // 5초 지연, 반복
   delay(5000);
