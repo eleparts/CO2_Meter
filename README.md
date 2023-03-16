@@ -10,7 +10,7 @@
 ## 사용법  
 
 1. 아두이노 IDE에 ESP32 보드를 추가  
-**환경설정** 메뉴의 보드매니저 URL 추가를 이용해 ESP32 보드를 추가해 줍니다.
+**환경설정** 메뉴의 보드매니저 URL 추가를 이용해 ESP32 보드를 추가해 줍니다.  
 ```https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json```
 
 2. 라이브러리 설치하기  
