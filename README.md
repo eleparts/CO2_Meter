@@ -1,8 +1,9 @@
 # CO2_Meter  
 
-[![샘플 이미지+유튜브 바로가기](https://raw.githubusercontent.com/eleparts/CO2_Meter/main/img/CO2_meter_sampel.jpg)](https://www.youtube.com/watch?v=iwCHd-AVvbM)  
+[ESP32](https://www.eleparts.co.kr/EPXRVLBX) 개발보드와 [MH-Z14A](https://www.eleparts.co.kr/goods/view?no=3186568) CO2 센서, [LCD1602 RGB Module](https://www.eleparts.co.kr/goods/view?no=10488490)를 사용해 CO2 측정기를 제작하는 예제입니다.  
 
-[ESP32](https://www.eleparts.co.kr/EPXRVLBX) 개발보드와 [MH-Z14A](https://www.eleparts.co.kr/goods/view?no=3186568) CO2 센서, [LCD1602 RGB Module](https://www.eleparts.co.kr/goods/view?no=10488490)를 사용해 CO2 측정기를 제작하는 예제입니다.
+[![샘플 이미지+유튜브 바로가기](https://raw.githubusercontent.com/eleparts/CO2_Meter/main/img/CO2_meter_sampel.jpg)](https://www.youtube.com/watch?v=iwCHd-AVvbM)  
+(이미지를 누르면 유튜브로 이동됩니다)  
 
 ※ 위 샘플 이미지에서 사용된 LCD는 [DFR0464](https://www.eleparts.co.kr/EPXV6B3U)(대체품) 입니다.  
 
@@ -15,6 +16,7 @@ Library 경로 내부에 있는 두개의 라이브러리 파일 (각 경로 내
 
 3. 회로 연결하기  
 ![회로도](https://raw.githubusercontent.com/eleparts/CO2_Meter/main/img/CO2_Meter.png)  
+※ CO2센서의 UART핀을 사용하며, 센서에 핀헤더를 납땜해 주어야 합니다.  
 
 4. example 내부의 예제 코드를 ESP32 보드에 업로드 해 줍니다.  
 
@@ -26,6 +28,6 @@ Library 경로 내부에 있는 두개의 라이브러리 파일 (각 경로 내
 
 ### 구성품 BOM  
 
-[기본 LCD(waveshare 1602 RGB LCD) 구성](https://www.eleparts.co.kr/bom/share?pj_seq=5CGDR8JY5&hseq=0OKBT2Y2)  
+[기본 LCD(Waveshare 1602 RGB LCD) 구성](https://www.eleparts.co.kr/bom/share?pj_seq=5CGDR8JY5&hseq=0OKBT2Y2)  
 
 [대체품 LCD(DFR0464) 구성](https://www.eleparts.co.kr/bom/share?pj_seq=U1ZRM5JY5&hseq=PTGMB8Y2)  
